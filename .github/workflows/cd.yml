@@ -67,10 +67,11 @@ jobs:
           fetch-depth: 0
 
       - name: Create pull request to development
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: development
-          branch: main
+          branch: sync-main-to-dev-${{ github.run_id }}
           title: 'Sync main to development'
           body: 'This PR syncs changes from `main` to `development` after deployment.'
+          delete-branch: true
