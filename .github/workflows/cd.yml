@@ -66,8 +66,8 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Fetch development branch
-        run: git fetch origin development
+      - name: Fetch all branches
+        run: git fetch origin "+refs/heads/*:refs/remotes/origin/*"
 
       - name: Create pull request to development
         uses: peter-evans/create-pull-request@v7
