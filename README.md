@@ -1,7 +1,7 @@
 
 # Shopify Git Workflow
 
-## Sample ci.yml
+## Sample ```ci.yml```
 ```bash
 name: CI
 on: [push, pull_request]
@@ -21,3 +21,7 @@ jobs:
         with:
           token: ${{ github.token }}
 ```
+Create ```.theme-check.yml``` if it doesn't exist already using command
+```bash
+shopify theme check --init
+``` 
