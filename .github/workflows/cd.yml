@@ -48,33 +48,25 @@ jobs:
           else
             echo "No deployment on this branch."
           fi
-
-  sync-main-to-dev:
+          
+  sync-main-to-development:
     name: Sync main → development
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     needs: deploy
-
     permissions:
       contents: write
       pull-requests: write
 
     steps:
-      - name: Checkout repository
+      - name: Checkout main branch
         uses: actions/checkout@v4
         with:
-          ref: main
           fetch-depth: 0
 
-      - name: Fetch all branches
-        run: git fetch origin "+refs/heads/*:refs/remotes/origin/*"
-
-      - name: Create pull request to development
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: development
-          branch: sync-main-to-dev-${{ github.run_id }}
-          title: 'Sync main to development'
-          body: 'This PR syncs changes from `main` to `development` after deployment.'
-          delete-branch: true
+      - name: Merge main into development
+        run: |
+          git fetch origin
+          git checkout development || git checkout -b development origin/development
+          git merge origin/main --no-edit
+          git push origin development
