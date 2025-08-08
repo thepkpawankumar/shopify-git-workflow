@@ -1,26 +1,76 @@
-name: Theme deploy
+name: Theme Deploy & Sync
 
-on: [push]
+on:
+  push:
+    branches:
+      - staging
+      - main
+  pull_request:
+    branches:
+      - staging
+      - main
 
 jobs:
   deploy:
-    name: Deploy
+    name: Deploy to Shopify Theme
     environment:
       name: staging
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install Shopify CLI
         run: npm install -g @shopify/cli
 
-      - name: Upload theme
+      - name: Push to correct Shopify theme
         run: |
-          shopify theme push \
-            --json \
-            --theme ${{ secrets.SHOPIFY_CLI_THEME_ID }} \
-            --store ${{ secrets.SHOPIFY_FLAG_STORE }} \
-            --password ${{ secrets.SHOPIFY_CLI_PASSWORD }}
+          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+            echo "Deploying to MAIN theme"
+            shopify theme push \
+              --json \
+              --theme ${{ secrets.SHOPIFY_CLI_THEME_ID }} \
+              --store ${{ secrets.SHOPIFY_FLAG_STORE }} \
+              --password ${{ secrets.SHOPIFY_CLI_PASSWORD }}
+          elif [[ "${GITHUB_REF##*/}" == "staging" ]]; then
+            echo "Deploying to STAGING theme"
+            shopify theme push \
+              --json \
+              --theme ${{ secrets.SHOPIFY_CLI_THEME_ID }} \
+              --store ${{ secrets.SHOPIFY_FLAG_STORE }} \
+              --password ${{ secrets.SHOPIFY_CLI_PASSWORD }}
+          else
+            echo "No deployment on this branch."
+          fi
+
+  sync-main-to-dev:
+    name: Sync main → development
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: deploy
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Create pull request to development
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: development
+          branch: main
+          title: 'Sync main to development'
+          body: 'This PR syncs changes from `main` to `development` after deployment.'
