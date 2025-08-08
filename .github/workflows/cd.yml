@@ -49,11 +49,24 @@ jobs:
             echo "No deployment on this branch."
           fi
           
+  sync-main-to-development:
+    name: Sync main → development
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: deploy
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Merge main into development
         run: |
-            git fetch origin
-            git checkout development || git checkout -b development origin/development
-            git pull origin main --no-edit
-            git push origin development
-
-
+          git fetch origin
+          git checkout development || git checkout -b development origin/development
+          git merge origin/main --no-edit
+          git push origin development
