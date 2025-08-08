@@ -22,6 +22,7 @@ jobs:
           token: ${{ github.token }}
 ```
 Create ```.theme-check.yml``` if it doesn't exist already using command
+
 ```bash
 shopify theme check --init
 ``` 
