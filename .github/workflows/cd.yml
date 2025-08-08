@@ -13,6 +13,8 @@ on:
 jobs:
   deploy:
     name: Deploy to Shopify Theme
+    environment:
+      name: staging
     runs-on: ubuntu-latest
 
     steps:
