@@ -70,3 +70,25 @@ jobs:
           git checkout development || git checkout -b development origin/development
           git merge origin/main --no-edit
           git push origin development
+
+  sync-main-to-store-theme:
+    name: Sync main → store-theme
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: deploy
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: store-theme
+          fetch-depth: 0
+
+      - name: Merge main into store-theme (prefer client changes on conflict)
+        run: |
+          git fetch origin main
+          git merge origin/main -X theirs --no-edit
+          git push origin store-theme
