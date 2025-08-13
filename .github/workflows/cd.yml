@@ -89,6 +89,8 @@ jobs:
 
       - name: Merge main into store-theme (prefer client changes on conflict)
         run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
           git fetch origin main
           git merge origin/main -X theirs --no-edit
           git push origin store-theme
